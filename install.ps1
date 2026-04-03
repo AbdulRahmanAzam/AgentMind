@@ -7,7 +7,7 @@
 #   powershell -ExecutionPolicy Bypass -File AgentMind\install.ps1
 # ──────────────────────────────────────────────────────────────
 
-$Version = "2.0.0"
+$Version = "2.1.0"
 $ScriptDir = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Definition }
 $Installed = @()
 
@@ -30,14 +30,15 @@ function Install-To {
     param(
         [string]$AgentDir,
         [string]$SkillDir,
-        [string]$IdeName
+        [string]$IdeName,
+        [string]$AgentGlob = "agentmind-*.agent.md"
     )
 
     New-Item -ItemType Directory -Force -Path $AgentDir | Out-Null
     New-Item -ItemType Directory -Force -Path "$SkillDir\agentmind" | Out-Null
 
-    # Copy agent files
-    Get-ChildItem -Path "$ScriptDir\agents\agentmind-*.md" -ErrorAction SilentlyContinue | Copy-Item -Destination $AgentDir -Force
+    # Copy agent files (.agent.md format)
+    Get-ChildItem -Path "$ScriptDir\agents\$AgentGlob" -ErrorAction SilentlyContinue | Copy-Item -Destination $AgentDir -Force
 
     # Copy skill files
     if (Test-Path "$ScriptDir\skills\agentmind") {
@@ -54,19 +55,22 @@ Write-Host "Detecting AI IDEs..." -ForegroundColor Blue
 Write-Host ""
 
 $UserHome = $env:USERPROFILE
+$AppData = $env:APPDATA
 
-# 1. Claude Code
+# 1. Claude Code (~/.claude/agents/)
 $ClaudeDir = "$UserHome\.claude"
 Install-To "$ClaudeDir\agents" "$ClaudeDir\skills" "Claude Code"
 
-# 2. VS Code Insiders
-if (Test-Path "$UserHome\.vscode-insiders") {
-    Install-To "$UserHome\.vscode-insiders\agents" "$UserHome\.vscode-insiders\skills" "VS Code Insiders"
+# 2. VS Code Insiders (user profile prompts directory)
+$VscInsidersDir = "$AppData\Code - Insiders"
+if (Test-Path $VscInsidersDir) {
+    Install-To "$VscInsidersDir\User\prompts" "$UserHome\.agents\skills" "VS Code Insiders"
 }
 
-# 3. VS Code
-if (Test-Path "$UserHome\.vscode") {
-    Install-To "$UserHome\.vscode\agents" "$UserHome\.vscode\skills" "VS Code"
+# 3. VS Code (user profile prompts directory)
+$VscDir = "$AppData\Code"
+if (Test-Path $VscDir) {
+    Install-To "$VscDir\User\prompts" "$UserHome\.agents\skills" "VS Code"
 }
 
 # 4. Cursor
@@ -91,7 +95,7 @@ Write-Host ""
 Write-Host "How to use:" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "  Claude Code:     claude -> /agentmind Build a REST API"
-Write-Host "  VS Code Copilot: @agentmind Build a REST API"
+Write-Host "  VS Code Copilot: @agentmind-lead Build a REST API"
 Write-Host "  Cursor:          mention agentmind-lead in chat"
 Write-Host "  Windsurf:        mention agentmind-lead in Cascade"
 Write-Host ""

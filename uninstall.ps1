@@ -16,10 +16,16 @@ function Remove-From {
 
     $Found = $false
 
-    # Remove agent files
+    # Remove agent files (.agent.md and legacy .md)
     if (Test-Path $AgentDir) {
-        $AgentFiles = Get-ChildItem -Path $AgentDir -Filter "agentmind-*.md" -ErrorAction SilentlyContinue
+        $AgentFiles = Get-ChildItem -Path $AgentDir -Filter "agentmind-*.agent.md" -ErrorAction SilentlyContinue
         foreach ($f in $AgentFiles) {
+            Remove-Item $f.FullName -Force
+            $Found = $true
+        }
+        # Also clean up legacy .md files
+        $LegacyFiles = Get-ChildItem -Path $AgentDir -Filter "agentmind-*.md" -ErrorAction SilentlyContinue
+        foreach ($f in $LegacyFiles) {
             Remove-Item $f.FullName -Force
             $Found = $true
         }
@@ -37,14 +43,20 @@ function Remove-From {
     }
 }
 
+$AppData = $env:APPDATA
+
 # Claude Code
 Remove-From "$UserHome\.claude\agents" "$UserHome\.claude\skills" "Claude Code"
 
-# VS Code Insiders
-Remove-From "$UserHome\.vscode-insiders\agents" "$UserHome\.vscode-insiders\skills" "VS Code Insiders"
+# VS Code Insiders (user profile prompts)
+Remove-From "$AppData\Code - Insiders\User\prompts" "$UserHome\.agents\skills" "VS Code Insiders"
+# Also clean legacy path
+Remove-From "$UserHome\.vscode-insiders\agents" "$UserHome\.vscode-insiders\skills" "VS Code Insiders (legacy)"
 
-# VS Code
-Remove-From "$UserHome\.vscode\agents" "$UserHome\.vscode\skills" "VS Code"
+# VS Code (user profile prompts)
+Remove-From "$AppData\Code\User\prompts" "$UserHome\.agents\skills" "VS Code"
+# Also clean legacy path
+Remove-From "$UserHome\.vscode\agents" "$UserHome\.vscode\skills" "VS Code (legacy)"
 
 # Cursor
 Remove-From "$UserHome\.cursor\agents" "$UserHome\.cursor\skills" "Cursor"

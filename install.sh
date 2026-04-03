@@ -8,7 +8,7 @@
 # ──────────────────────────────────────────────────────────────
 set -euo pipefail
 
-VERSION="2.0.0"
+VERSION="2.1.0"
 
 # Colors
 RED='\033[0;31m'
@@ -44,8 +44,8 @@ install_to() {
     mkdir -p "${agent_dir}"
     mkdir -p "${skill_dir}/agentmind"
 
-    # Copy agent files
-    cp "${SCRIPT_DIR}"/agents/agentmind-*.md "${agent_dir}/" 2>/dev/null || true
+    # Copy agent files (.agent.md format)
+    cp "${SCRIPT_DIR}"/agents/agentmind-*.agent.md "${agent_dir}/" 2>/dev/null || true
 
     # Copy skill files
     cp -r "${SCRIPT_DIR}"/skills/agentmind/* "${skill_dir}/agentmind/" 2>/dev/null || true
@@ -68,12 +68,20 @@ else
     install_to "${HOME}/.claude/agents" "${HOME}/.claude/skills" "Claude Code (pre-installed)"
 fi
 
-# 2. VS Code / Copilot (~/.vscode/agents/ or ~/.vscode-insiders/agents/)
-if [ -d "${HOME}/.vscode-insiders" ]; then
-    install_to "${HOME}/.vscode-insiders/agents" "${HOME}/.vscode-insiders/skills" "VS Code Insiders"
+# 2. VS Code / Copilot (user profile prompts directory)
+# macOS: ~/Library/Application Support/Code/User/prompts/
+# Linux: ~/.config/Code/User/prompts/
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    VSCODE_DATA="${HOME}/Library/Application Support"
+else
+    VSCODE_DATA="${HOME}/.config"
 fi
-if [ -d "${HOME}/.vscode" ]; then
-    install_to "${HOME}/.vscode/agents" "${HOME}/.vscode/skills" "VS Code"
+
+if [ -d "${VSCODE_DATA}/Code - Insiders" ]; then
+    install_to "${VSCODE_DATA}/Code - Insiders/User/prompts" "${HOME}/.agents/skills" "VS Code Insiders"
+fi
+if [ -d "${VSCODE_DATA}/Code" ]; then
+    install_to "${VSCODE_DATA}/Code/User/prompts" "${HOME}/.agents/skills" "VS Code"
 fi
 
 # 3. Cursor (~/.cursor/agents/)
@@ -105,7 +113,7 @@ echo ""
 echo -e "${CYAN}How to use:${NC}"
 echo ""
 echo "  Claude Code:     claude → /agentmind Build a REST API with auth"
-echo "  VS Code Copilot: @agentmind Build a REST API with auth"
+echo "  VS Code Copilot: @agentmind-lead Build a REST API with auth"
 echo "  Cursor:          mention agentmind-lead in chat"
 echo "  Windsurf:        mention agentmind-lead in Cascade"
 echo ""

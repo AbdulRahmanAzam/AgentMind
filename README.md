@@ -27,7 +27,8 @@ The installer auto-detects your IDEs and copies agent/skill files to the right l
 | IDE | Agents Directory | Skills Directory |
 |-----|-----------------|-----------------|
 | Claude Code | `~/.claude/agents/` | `~/.claude/skills/agentmind/` |
-| VS Code / Copilot | `~/.vscode/agents/` | `~/.vscode/skills/agentmind/` |
+| VS Code Insiders | `%APPDATA%/Code - Insiders/User/prompts/` (Win) · `~/.config/Code - Insiders/User/prompts/` (Linux) · `~/Library/Application Support/Code - Insiders/User/prompts/` (macOS) | `~/.agents/skills/agentmind/` |
+| VS Code | `%APPDATA%/Code/User/prompts/` (Win) · `~/.config/Code/User/prompts/` (Linux) · `~/Library/Application Support/Code/User/prompts/` (macOS) | `~/.agents/skills/agentmind/` |
 | Cursor | `~/.cursor/agents/` | `~/.cursor/skills/agentmind/` |
 | Windsurf | `~/.codeium/windsurf/agents/` | `~/.codeium/windsurf/skills/agentmind/` |
 
@@ -123,7 +124,7 @@ claude
 ### VS Code Copilot
 Open the Chat panel and type:
 ```
-@agentmind Build a full-stack todo app with React, Express, and PostgreSQL
+@agentmind-lead Build a full-stack todo app with React, Express, and PostgreSQL
 ```
 
 ### Cursor / Windsurf
@@ -146,16 +147,16 @@ Reference `agentmind-lead` in chat:
 
 ```
 AgentMind/
-├── agents/                         # Agent definitions (markdown + YAML frontmatter)
-│   ├── agentmind-lead.md           # Team Lead — the orchestrator
-│   ├── agentmind-backend.md        # Backend Developer
-│   ├── agentmind-frontend.md       # Frontend Developer
-│   ├── agentmind-test.md           # Test Engineer
-│   ├── agentmind-security.md       # Security Reviewer (read-only)
-│   ├── agentmind-reviewer.md       # Code Reviewer (read-only)
-│   ├── agentmind-devops.md         # DevOps Engineer
-│   ├── agentmind-docs.md           # Documentation Writer
-│   └── agentmind-perf.md           # Performance Optimizer
+├── agents/                         # Agent definitions (.agent.md format)
+│   ├── agentmind-lead.agent.md     # Team Lead — the orchestrator
+│   ├── agentmind-backend.agent.md  # Backend Developer
+│   ├── agentmind-frontend.agent.md # Frontend Developer
+│   ├── agentmind-test.agent.md     # Test Engineer
+│   ├── agentmind-security.agent.md # Security Reviewer (read-only)
+│   ├── agentmind-reviewer.agent.md # Code Reviewer (read-only)
+│   ├── agentmind-devops.agent.md   # DevOps Engineer
+│   ├── agentmind-docs.agent.md     # Documentation Writer
+│   └── agentmind-perf.agent.md     # Performance Optimizer
 ├── skills/
 │   └── agentmind/
 │       └── SKILL.md                # Main orchestration skill & protocol
