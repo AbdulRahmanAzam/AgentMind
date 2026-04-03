@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.agentmind/
+*.vsix
+.vscode-test/
+out/
+*.js.map
+.DS_Store
+Thumbs.db

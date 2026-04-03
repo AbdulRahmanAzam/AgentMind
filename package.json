@@ -1,0 +1,106 @@
+{
+  "name": "agentmind",
+  "displayName": "AgentMind",
+  "description": "Collaborative multi-agent orchestration for VS Code. Spin up specialized AI agent teams that coordinate through shared task lists and direct messaging.",
+  "version": "0.1.0",
+  "publisher": "agentmind",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/agentmind/agentmind"
+  },
+  "engines": {
+    "vscode": "^1.99.0"
+  },
+  "categories": [
+    "AI",
+    "Chat"
+  ],
+  "keywords": [
+    "ai",
+    "agents",
+    "multi-agent",
+    "copilot",
+    "orchestration",
+    "collaborative"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onChatParticipant:agentmind.lead"
+  ],
+  "contributes": {
+    "chatParticipants": [
+      {
+        "id": "agentmind.lead",
+        "name": "agentmind",
+        "fullName": "AgentMind Team Lead",
+        "description": "Orchestrate a team of specialized AI agents to tackle complex tasks collaboratively",
+        "isSticky": true,
+        "commands": [
+          {
+            "name": "plan",
+            "description": "Create an execution plan for a task without starting agents"
+          },
+          {
+            "name": "status",
+            "description": "Show current team status, active agents, and task progress"
+          },
+          {
+            "name": "stop",
+            "description": "Gracefully stop all agents and the current team"
+          }
+        ]
+      }
+    ],
+    "configuration": {
+      "title": "AgentMind",
+      "properties": {
+        "agentmind.maxTeamSize": {
+          "type": "number",
+          "default": 5,
+          "minimum": 2,
+          "maximum": 8,
+          "description": "Maximum number of teammate agents allowed in a team"
+        },
+        "agentmind.autoApproveTaskPlan": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically approve the lead agent's task plan without user confirmation"
+        },
+        "agentmind.agentPollingIntervalMs": {
+          "type": "number",
+          "default": 3000,
+          "minimum": 1000,
+          "maximum": 15000,
+          "description": "How often each agent checks for new messages and task updates (milliseconds)"
+        },
+        "agentmind.heartbeatIntervalMs": {
+          "type": "number",
+          "default": 30000,
+          "description": "How often each agent writes a heartbeat to its state file (milliseconds)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "node esbuild.js --production",
+    "compile": "node esbuild.js",
+    "watch": "node esbuild.js --watch",
+    "package": "vsce package",
+    "lint": "npx tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "proper-lockfile": "^4.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/proper-lockfile": "^4.1.4",
+    "@types/vscode": "^1.99.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.0"
+  }
+}
