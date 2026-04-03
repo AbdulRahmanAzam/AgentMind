@@ -21,28 +21,38 @@ AgentMind transforms your VS Code into a collaborative AI workspace where multip
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### One-Line Install (No npm required)
 
-- **VS Code** 1.96.0 or later (Insiders recommended for latest Chat API)
-- **Node.js** 18+ and **npm**
-- A language model available via the VS Code Language Model API (e.g., GitHub Copilot)
+The extension comes pre-built — just clone and run the install script:
 
-### Install & Run
+**macOS / Linux:**
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-org/agentmind.git
-cd agentmind
-
-# Install dependencies
-npm install
-
-# Compile the extension
-npm run compile
-
-# Open in VS Code and press F5 to launch the Extension Development Host
-code .
+git clone --depth 1 https://github.com/AbdulRahmanAzam/AgentMind.git && bash AgentMind/install.sh
 ```
+
+**Windows (PowerShell):**
+
+```powershell
+git clone --depth 1 https://github.com/AbdulRahmanAzam/AgentMind.git; powershell -ExecutionPolicy Bypass -File AgentMind\install.ps1
+```
+
+Restart VS Code after installing. That's it!
+
+### Uninstall
+
+```bash
+# macOS / Linux
+bash AgentMind/uninstall.sh
+
+# Windows (PowerShell)
+powershell -ExecutionPolicy Bypass -File AgentMind\uninstall.ps1
+```
+
+### Prerequisites
+
+- **VS Code** 1.96.0 or later (Insiders also supported)
+- A language model available via the VS Code Language Model API (e.g., GitHub Copilot)
 
 ### First Use
 
@@ -163,7 +173,13 @@ src/
 
 ## 🧑‍💻 Development
 
+For contributors who want to build from source:
+
 ```bash
+# Clone the repository
+git clone https://github.com/AbdulRahmanAzam/AgentMind.git
+cd AgentMind
+
 # Install dependencies
 npm install
 
@@ -175,9 +191,6 @@ npx tsc --noEmit
 
 # Run tests
 npm test
-
-# Run tests with coverage
-npx vitest run --coverage
 
 # Watch mode
 npm run watch

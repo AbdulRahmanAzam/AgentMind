@@ -1,5 +1,4 @@
 node_modules/
-dist/
 .agentmind/
 *.vsix
 .vscode-test/
