@@ -1,43 +1,35 @@
 # 🧠 AgentMind
 
-**Collaborative multi-agent orchestration for VS Code**
+**Collaborative multi-agent orchestration for ANY AI IDE**
 
-AgentMind transforms your VS Code into a collaborative AI workspace where multiple specialized agents work together on complex tasks — planning, coding, reviewing, and documenting — all coordinated by an intelligent Team Lead.
+AgentMind transforms your AI coding assistant into a collaborative workspace where multiple specialist agents work together — planning, coding, reviewing, testing, and debugging — all coordinated by an intelligent Team Lead.
 
----
-
-## ✨ Features
-
-- **Multi-Agent Teams** — Spin up a team of 2–5 AI agents, each with a distinct role (Backend Dev, Frontend Dev, Test Engineer, Security Reviewer, and more).
-- **Intelligent Task Planning** — The Team Lead decomposes your request into tasks, assigns them based on expertise, and monitors progress.
-- **File-Safe Collaboration** — Lock-based concurrency ensures agents never overwrite each other's work.
-- **Inter-Agent Messaging** — Agents communicate through a JSONL mailbox with direct messages, broadcasts, and system notifications.
-- **Dependency-Aware Tasks** — Tasks can declare dependencies; blocked tasks are automatically unblocked when prerequisites complete.
-- **Built-In Security** — Path traversal protection, dangerous command blocking, and read-only roles for reviewers.
-- **Live Terminal Output** — Each agent gets its own pseudoterminal so you can watch progress in real time.
-- **Onboarding Flow** — A guided setup picks team size and roles via the VS Code chat interface.
+Works with **Claude Code**, **VS Code Copilot**, **Cursor**, **Windsurf**, and any AI-powered IDE.
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Installation
 
-### One-Line Install (No npm required)
-
-The extension comes pre-built — just clone and run the install script:
+### One-Line Install
 
 **macOS / Linux:**
-
 ```bash
 git clone --depth 1 https://github.com/AbdulRahmanAzam/AgentMind.git && bash AgentMind/install.sh
 ```
 
 **Windows (PowerShell):**
-
 ```powershell
 git clone --depth 1 https://github.com/AbdulRahmanAzam/AgentMind.git; powershell -ExecutionPolicy Bypass -File AgentMind\install.ps1
 ```
 
-Restart VS Code after installing. That's it!
+The installer auto-detects your IDEs and copies agent/skill files to the right locations:
+
+| IDE | Agents Directory | Skills Directory |
+|-----|-----------------|-----------------|
+| Claude Code | `~/.claude/agents/` | `~/.claude/skills/agentmind/` |
+| VS Code / Copilot | `~/.vscode/agents/` | `~/.vscode/skills/agentmind/` |
+| Cursor | `~/.cursor/agents/` | `~/.cursor/skills/agentmind/` |
+| Windsurf | `~/.codeium/windsurf/agents/` | `~/.codeium/windsurf/skills/agentmind/` |
 
 ### Uninstall
 
@@ -49,187 +41,183 @@ bash AgentMind/uninstall.sh
 powershell -ExecutionPolicy Bypass -File AgentMind\uninstall.ps1
 ```
 
-### Prerequisites
-
-- **VS Code** 1.96.0 or later (Insiders also supported)
-- A language model available via the VS Code Language Model API (e.g., GitHub Copilot)
-
-### First Use
-
-1. Open the **Chat** panel in VS Code.
-2. Type `@agentmind` followed by your request, e.g.:
-
-   ```
-   @agentmind Build a REST API with authentication and tests
-   ```
-
-3. The onboarding flow will ask you to select a team size and roles.
-4. Watch agents collaborate in their dedicated terminals!
-
 ---
 
-## 🏗️ How It Works
+## ✨ How It Works
+
+You give AgentMind a request. The Team Lead assembles specialists, creates a task plan, and coordinates execution:
 
 ```
-User Request
-     │
-     ▼
-┌──────────┐     ┌─────────────┐
-│ Onboarding│────▶│  Team Lead   │
-│   Flow    │     │ (5 phases)   │
-└──────────┘     └──────┬──────┘
-                        │
-        ┌───────────────┼───────────────┐
-        ▼               ▼               ▼
-   ┌─────────┐    ┌─────────┐    ┌─────────┐
-   │ Agent 1  │    │ Agent 2  │    │ Agent 3  │
-   │ Backend  │    │ Frontend │    │  Tests   │
-   └─────────┘    └─────────┘    └─────────┘
-        │               │               │
-        └───────── Shared State ────────┘
-              (Tasks · Mailbox · Locks)
+User: "Build a REST API with auth, tests, and docs"
+         │
+         ▼
+┌──────────────────┐
+│   🧠 Team Lead    │  Understands → Plans → Delegates → Monitors → Verifies
+└────────┬─────────┘
+         │
+    ┌────┼────┬────────┐
+    ▼    ▼    ▼        ▼
+  ⚙️     🧪    🔒       📝
+ Backend Test Security  Docs
+    │    │    │        │
+    └────┴────┴────────┘
+         │
+   Shared Workspace (.agentmind/)
+   Tasks · Mailbox · Status
 ```
 
-**Team Lead Phases:**
+### The 5 Phases
 
-1. **Plan** — Decompose the request into a task graph.
-2. **Assign** — Match tasks to the best-suited agents.
-3. **Monitor** — Track progress, handle failures, rebalance if needed.
-4. **Verify** — Ensure all tasks are complete and compile/test checks pass.
-5. **Complete** — Summarize results and report back to the user.
+1. **Onboarding** — Lead understands your request, asks clarifying questions
+2. **Planning** — Decomposes into tasks with dependencies, assembles the right team
+3. **Execution** — Each agent deep-researches, then implements step by step
+4. **Verification** — Build, test, lint, typecheck — debug until everything passes
+5. **Completion** — Summary of what was built, files changed, architecture decisions
 
----
+### Agent Deep Research
 
-## 🎭 Agent Roles
+Every agent **must research before coding**:
+- Read existing codebase thoroughly
+- Understand patterns and conventions
+- Check what other agents have built
+- Plan their approach step by step
+- Ask questions when confused (via mailbox)
 
-| Role | Icon | Description |
-|------|------|-------------|
-| Backend Developer | ⚙️ | APIs, databases, server logic |
-| Frontend Developer | 🎨 | UI components, styling, accessibility |
-| Test Engineer | 🧪 | Unit, integration, and e2e tests |
-| Security Reviewer | 🔒 | OWASP Top 10 audits (read-only) |
-| Code Reviewer | 👁️ | Quality, patterns, readability (read-only) |
-| DevOps Engineer | 🚀 | CI/CD, Docker, deployment |
-| Doc Writer | 📝 | README, API docs, guides |
-| Perf Optimizer | ⚡ | Profiling, caching, bundle size |
+### Inter-Agent Communication
 
-You can also define **custom roles** or let the **Lead Decide** the best fit.
+Agents talk to each other through `.agentmind/mailbox/`:
 
----
-
-## ⚙️ Configuration
-
-Configure via VS Code settings (`Ctrl+,`):
-
-| Setting | Default | Description |
-|---------|---------|-------------|
-| `agentmind.defaultTeamSize` | `3` | Default number of agents |
-| `agentmind.maxAgents` | `5` | Maximum agents allowed |
-| `agentmind.heartbeatIntervalMs` | `10000` | Heartbeat ping interval (ms) |
-| `agentmind.taskTimeoutMs` | `300000` | Task timeout (ms) |
-
----
-
-## 📁 Architecture
-
-```
-src/
-├── communication/       # Lock manager, task list, mailbox
-│   ├── lockManager.ts   # proper-lockfile based mutual exclusion
-│   ├── taskList.ts      # JSON-file task CRUD with dependency graph
-│   └── mailbox.ts       # JSONL append-log messaging
-├── llm/                 # Language model integration
-│   ├── modelAccess.ts   # Agent loop with tool calling
-│   ├── toolDefinitions.ts
-│   └── agentPrompts.ts
-├── orchestrator/        # Execution engine
-│   ├── taskPlanner.ts   # LLM-powered task decomposition
-│   ├── teammate.ts      # Autonomous agent loop
-│   ├── agentManager.ts  # Agent lifecycle & monitoring
-│   └── teamLead.ts      # 5-phase team coordination
-├── participant/         # VS Code Chat Participants API
-│   ├── handler.ts       # Chat request handler
-│   └── onboarding.ts    # Guided team setup
-├── roles/
-│   └── presets.ts       # 8 built-in role definitions
-├── storage/
-│   ├── workspace.ts     # .agentmind/ directory management
-│   └── agentmindMd.ts   # Project context generation
-├── terminal/
-│   ├── formatter.ts     # ANSI terminal output
-│   └── agentTerminal.ts # Pseudoterminal per agent
-├── tools/
-│   ├── fileTools.ts     # Read/write/edit/search files
-│   ├── terminalTools.ts # Shell command execution
-│   └── codeTools.ts     # Diagnostics & symbol info
-├── utils/
-│   ├── logger.ts
-│   └── ids.ts
-├── types.ts
-└── extension.ts         # Activation & registration
+```json
+{"from": "agentmind-backend", "to": "agentmind-test", "content": "Auth endpoints ready at src/routes/auth.ts. Test /register, /login, /refresh.", "type": "direct"}
 ```
 
+The Lead monitors all communication, answers questions, and ensures smooth handoffs.
+
 ---
 
-## 🧑‍💻 Development
+## 🎭 Available Agents
 
-For contributors who want to build from source:
+| Agent | Icon | Role | Access |
+|-------|------|------|--------|
+| `agentmind-lead` | 🧠 | Team Lead — orchestrates everything | Full |
+| `agentmind-backend` | ⚙️ | APIs, databases, server logic, auth | Full |
+| `agentmind-frontend` | 🎨 | UI components, styling, state management | Full |
+| `agentmind-test` | 🧪 | Unit, integration, and e2e tests | Full |
+| `agentmind-security` | 🔒 | OWASP audits, vulnerability scanning | Read-only |
+| `agentmind-reviewer` | 👁️ | Code quality, patterns, readability | Read-only |
+| `agentmind-devops` | 🚀 | CI/CD, Docker, deployment | Full |
+| `agentmind-docs` | 📝 | README, API docs, architecture guides | Full |
+| `agentmind-perf` | ⚡ | Profiling, caching, optimization | Full |
 
+---
+
+## 💬 Quick Start
+
+### Claude Code
 ```bash
-# Clone the repository
-git clone https://github.com/AbdulRahmanAzam/AgentMind.git
-cd AgentMind
-
-# Install dependencies
-npm install
-
-# Compile (esbuild)
-npm run compile
-
-# Type-check
-npx tsc --noEmit
-
-# Run tests
-npm test
-
-# Watch mode
-npm run watch
+claude
+# then type:
+/agentmind Build a full-stack todo app with React, Express, and PostgreSQL
 ```
 
-### Running in VS Code
+### VS Code Copilot
+Open the Chat panel and type:
+```
+@agentmind Build a full-stack todo app with React, Express, and PostgreSQL
+```
 
-1. Open the project in VS Code.
-2. Press **F5** to launch the Extension Development Host.
-3. In the new window, open the Chat panel and type `@agentmind`.
+### Cursor / Windsurf
+Reference `agentmind-lead` in chat:
+```
+@agentmind-lead Build a full-stack todo app with React, Express, and PostgreSQL
+```
+
+### What Happens Next
+
+1. The Lead asks you to confirm the team (e.g., Backend + Frontend + Test + Security)
+2. You say "yes" or adjust
+3. Agents start working — each in their own session
+4. They communicate, build, test, and debug collaboratively
+5. Lead verifies everything passes and gives you the summary
 
 ---
 
-## 🤝 Contributing
+## 🏗️ Architecture
 
-Contributions are welcome! Please follow these guidelines:
+```
+AgentMind/
+├── agents/                         # Agent definitions (markdown + YAML frontmatter)
+│   ├── agentmind-lead.md           # Team Lead — the orchestrator
+│   ├── agentmind-backend.md        # Backend Developer
+│   ├── agentmind-frontend.md       # Frontend Developer
+│   ├── agentmind-test.md           # Test Engineer
+│   ├── agentmind-security.md       # Security Reviewer (read-only)
+│   ├── agentmind-reviewer.md       # Code Reviewer (read-only)
+│   ├── agentmind-devops.md         # DevOps Engineer
+│   ├── agentmind-docs.md           # Documentation Writer
+│   └── agentmind-perf.md           # Performance Optimizer
+├── skills/
+│   └── agentmind/
+│       └── SKILL.md                # Main orchestration skill & protocol
+├── install.sh                      # Unix/macOS installer
+├── install.ps1                     # Windows installer
+├── uninstall.sh                    # Unix/macOS uninstaller
+├── uninstall.ps1                   # Windows uninstaller
+├── LICENSE
+└── README.md
+```
 
-1. **Fork** the repository and create a feature branch.
-2. **Write tests** for new functionality (aim for ≥80% coverage).
-3. **Run** `npm test` and `npx tsc --noEmit` before submitting.
-4. **Open a Pull Request** with a clear description of your changes.
+### Workspace Communication Files
 
-### Code Style
+When agents are working, they create `.agentmind/` in your project:
 
-- TypeScript strict mode
-- ESM imports with `.js` extensions
-- Prefer `async/await` over raw Promises
-- Use `LockManager.withLock()` for all shared file access
+```
+your-project/
+└── .agentmind/
+    ├── tasks.json                  # Task list with statuses & dependencies
+    ├── mailbox/
+    │   ├── broadcast.jsonl         # Team-wide announcements
+    │   ├── lead.jsonl              # Messages to the Lead
+    │   ├── agentmind-backend.jsonl # Messages to Backend Dev
+    │   └── ...                     # One file per agent
+    └── state/
+        └── team.json               # Current team roster & phase
+```
+
+---
+
+## ⚙️ Task System
+
+Tasks have statuses and dependency tracking:
+
+| Status | Meaning |
+|--------|---------|
+| `pending` | Ready to start (no unmet dependencies) |
+| `blocked` | Waiting for dependency tasks to complete |
+| `in-progress` | Agent is actively working |
+| `completed` | Done successfully |
+| `failed` | Failed — Lead will create fix tasks |
+
+Priorities: `critical` → `high` → `medium` → `low`
+
+---
+
+## 🔒 Security
+
+- **Read-only agents**: Security Reviewer and Code Reviewer cannot modify files
+- **Path traversal protection**: Agents validate file paths within the workspace
+- **Dangerous command blocking**: Recursive deletes, disk format, fork bombs are blocked
+- **No secrets in code**: Agents use environment variables for sensitive config
 
 ---
 
 ## 🗺️ Roadmap
 
-- [ ] Agent-to-agent code review handoff
-- [ ] Custom tool plugins
-- [ ] Persistent team configurations
-- [ ] Web UI dashboard for team monitoring
-- [ ] Support for additional LLM providers
-- [ ] Task priority rebalancing during execution
+- [ ] Custom agent definitions (bring your own specialist)
+- [ ] Persistent team configurations across projects
+- [ ] Web dashboard for monitoring agent progress
+- [ ] MCP server integration for external tools
+- [ ] Agent memory — learn from past projects
 
 ---
 
@@ -241,7 +229,6 @@ Contributions are welcome! Please follow these guidelines:
 
 ## 🙏 Acknowledgments
 
-- [VS Code Chat Participants API](https://code.visualstudio.com/api/extension-guides/chat)
-- [VS Code Language Model API](https://code.visualstudio.com/api/extension-guides/language-model)
-- [proper-lockfile](https://github.com/moxystudio/node-proper-lockfile) for cross-platform file locking
-- The open-source community for inspiration and feedback
+- Inspired by [claude-seo](https://github.com/AgriciDaniel/claude-seo) for the agent/skill architecture
+- The multi-agent collaboration pattern from software engineering teams
+- The open-source AI tooling community

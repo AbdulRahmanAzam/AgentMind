@@ -1,112 +1,123 @@
 #!/usr/bin/env bash
 # ──────────────────────────────────────────────────────────────
-# AgentMind — One-line installer for VS Code
+# AgentMind — Universal Installer
+# Installs multi-agent orchestration for ALL AI-powered IDEs
 #
 # Usage:
-#   git clone --depth 1 https://github.com/AbdulRahmanAzam/AgentMind.git
-#   bash AgentMind/install.sh
-#
-# Or one-liner:
 #   git clone --depth 1 https://github.com/AbdulRahmanAzam/AgentMind.git && bash AgentMind/install.sh
 # ──────────────────────────────────────────────────────────────
 set -euo pipefail
 
-VERSION="0.1.0"
-EXT_ID="agentmind.agentmind-${VERSION}"
+VERSION="2.0.0"
 
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+CYAN='\033[0;36m'
+NC='\033[0m'
 
-echo ""
-echo -e "${BLUE}╔══════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║     🧠 AgentMind Installer v${VERSION}            ║${NC}"
-echo -e "${BLUE}║     Multi-Agent Orchestration for VS Code    ║${NC}"
-echo -e "${BLUE}╚══════════════════════════════════════════════╝${NC}"
-echo ""
-
-# ── Find the repo root (where this script lives) ────────────
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INSTALLED=()
 
-# Verify we have the required files
-if [ ! -f "${SCRIPT_DIR}/package.json" ]; then
-    echo -e "${RED}✗ Error: package.json not found in ${SCRIPT_DIR}${NC}"
+echo ""
+echo -e "${CYAN}╔══════════════════════════════════════════════════════╗${NC}"
+echo -e "${CYAN}║   🧠 AgentMind v${VERSION} — Universal Installer          ║${NC}"
+echo -e "${CYAN}║   Multi-Agent Orchestration for ANY AI IDE           ║${NC}"
+echo -e "${CYAN}╚══════════════════════════════════════════════════════╝${NC}"
+echo ""
+
+# ── Verify repo files exist ──────────────────────────────────
+if [ ! -d "${SCRIPT_DIR}/agents" ] || [ ! -d "${SCRIPT_DIR}/skills" ]; then
+    echo -e "${RED}✗ Error: agents/ or skills/ directory not found in ${SCRIPT_DIR}${NC}"
     echo "  Make sure you cloned the full repository."
     exit 1
 fi
 
-if [ ! -f "${SCRIPT_DIR}/dist/extension.js" ]; then
-    echo -e "${RED}✗ Error: dist/extension.js not found.${NC}"
-    echo "  The pre-built extension bundle is missing."
-    exit 1
-fi
+# ── Helper: install agents + skills to a target directory ─────
+install_to() {
+    local agent_dir="$1"
+    local skill_dir="$2"
+    local ide_name="$3"
 
-# ── Detect VS Code variant ──────────────────────────────────
-VSCODE_DIR=""
-VSCODE_NAME=""
+    mkdir -p "${agent_dir}"
+    mkdir -p "${skill_dir}/agentmind"
 
-if [ -d "${HOME}/.vscode-insiders/extensions" ]; then
-    VSCODE_DIR="${HOME}/.vscode-insiders/extensions"
-    VSCODE_NAME="VS Code Insiders"
-elif [ -d "${HOME}/.vscode/extensions" ]; then
-    VSCODE_DIR="${HOME}/.vscode/extensions"
-    VSCODE_NAME="VS Code"
-elif [ -d "${HOME}/.vscode-oss/extensions" ]; then
-    VSCODE_DIR="${HOME}/.vscode-oss/extensions"
-    VSCODE_NAME="VS Code OSS"
+    # Copy agent files
+    cp "${SCRIPT_DIR}"/agents/agentmind-*.md "${agent_dir}/" 2>/dev/null || true
+
+    # Copy skill files
+    cp -r "${SCRIPT_DIR}"/skills/agentmind/* "${skill_dir}/agentmind/" 2>/dev/null || true
+
+    INSTALLED+=("${ide_name}")
+    echo -e "  ${GREEN}✓${NC} ${ide_name}"
+    echo -e "    Agents → ${agent_dir}"
+    echo -e "    Skills → ${skill_dir}/agentmind/"
+}
+
+# ── Detect and install for each IDE ──────────────────────────
+echo -e "${BLUE}→ Detecting AI IDEs...${NC}"
+echo ""
+
+# 1. Claude Code (~/.claude/agents/ + ~/.claude/skills/)
+if [ -d "${HOME}/.claude" ] || command -v claude >/dev/null 2>&1; then
+    install_to "${HOME}/.claude/agents" "${HOME}/.claude/skills" "Claude Code"
 else
-    echo -e "${RED}✗ Error: Could not find VS Code extensions directory.${NC}"
-    echo "  Checked:"
-    echo "    ~/.vscode/extensions"
-    echo "    ~/.vscode-insiders/extensions"
-    echo "    ~/.vscode-oss/extensions"
-    echo ""
-    echo "  Make sure VS Code is installed."
-    exit 1
+    # Install anyway — user might install Claude Code later
+    install_to "${HOME}/.claude/agents" "${HOME}/.claude/skills" "Claude Code (pre-installed)"
 fi
 
-echo -e "${BLUE}→ Detected: ${VSCODE_NAME}${NC}"
-echo -e "${BLUE}→ Extensions dir: ${VSCODE_DIR}${NC}"
-echo ""
-
-# ── Remove old version if exists ─────────────────────────────
-OLD_DIR="${VSCODE_DIR}/${EXT_ID}"
-if [ -d "${OLD_DIR}" ]; then
-    echo -e "${YELLOW}→ Removing previous installation...${NC}"
-    rm -rf "${OLD_DIR}"
+# 2. VS Code / Copilot (~/.vscode/agents/ or ~/.vscode-insiders/agents/)
+if [ -d "${HOME}/.vscode-insiders" ]; then
+    install_to "${HOME}/.vscode-insiders/agents" "${HOME}/.vscode-insiders/skills" "VS Code Insiders"
+fi
+if [ -d "${HOME}/.vscode" ]; then
+    install_to "${HOME}/.vscode/agents" "${HOME}/.vscode/skills" "VS Code"
 fi
 
-# ── Install ──────────────────────────────────────────────────
-TARGET_DIR="${VSCODE_DIR}/${EXT_ID}"
+# 3. Cursor (~/.cursor/agents/)
+if [ -d "${HOME}/.cursor" ]; then
+    install_to "${HOME}/.cursor/agents" "${HOME}/.cursor/skills" "Cursor"
+fi
 
-echo -e "${BLUE}→ Installing AgentMind to ${TARGET_DIR}${NC}"
+# 4. Windsurf (~/.codeium/windsurf/agents/)
+if [ -d "${HOME}/.codeium/windsurf" ]; then
+    install_to "${HOME}/.codeium/windsurf/agents" "${HOME}/.codeium/windsurf/skills" "Windsurf"
+elif [ -d "${HOME}/.windsurf" ]; then
+    install_to "${HOME}/.windsurf/agents" "${HOME}/.windsurf/skills" "Windsurf"
+fi
 
-mkdir -p "${TARGET_DIR}/dist"
+# ── Summary ──────────────────────────────────────────────────
+echo ""
+if [ ${#INSTALLED[@]} -eq 0 ]; then
+    echo -e "${YELLOW}⚠  No AI IDEs detected. Installed to Claude Code directory by default.${NC}"
+    install_to "${HOME}/.claude/agents" "${HOME}/.claude/skills" "Claude Code (default)"
+fi
 
-# Copy only what the extension needs (no node_modules, no src)
-cp "${SCRIPT_DIR}/package.json" "${TARGET_DIR}/"
-cp "${SCRIPT_DIR}/dist/extension.js" "${TARGET_DIR}/dist/"
-cp "${SCRIPT_DIR}/LICENSE" "${TARGET_DIR}/" 2>/dev/null || true
-cp "${SCRIPT_DIR}/README.md" "${TARGET_DIR}/" 2>/dev/null || true
-
 echo ""
-echo -e "${GREEN}╔══════════════════════════════════════════════╗${NC}"
-echo -e "${GREEN}║     ✓ AgentMind installed successfully!      ║${NC}"
-echo -e "${GREEN}╚══════════════════════════════════════════════╝${NC}"
+echo -e "${GREEN}╔══════════════════════════════════════════════════════╗${NC}"
+echo -e "${GREEN}║   ✓ AgentMind installed successfully!                ║${NC}"
+echo -e "${GREEN}╚══════════════════════════════════════════════════════╝${NC}"
 echo ""
-echo -e "${BLUE}How to use:${NC}"
-echo "  1. Reload VS Code (Ctrl+Shift+P → 'Reload Window')"
-echo "  2. Open Chat panel (Ctrl+I)"
-echo "  3. Type: @agentmind build a REST API"
+echo -e "${BLUE}Installed for: ${INSTALLED[*]}${NC}"
 echo ""
-echo -e "${BLUE}Commands:${NC}"
-echo "  @agentmind <request>   — Start a new task"
-echo "  @agentmind /plan       — Create plan without starting"
-echo "  @agentmind /status     — Show team progress"
-echo "  @agentmind /stop       — Stop all agents"
+echo -e "${CYAN}How to use:${NC}"
 echo ""
-echo -e "${YELLOW}Note: You may need to restart VS Code for the extension to appear.${NC}"
+echo "  Claude Code:     claude → /agentmind Build a REST API with auth"
+echo "  VS Code Copilot: @agentmind Build a REST API with auth"
+echo "  Cursor:          mention agentmind-lead in chat"
+echo "  Windsurf:        mention agentmind-lead in Cascade"
 echo ""
+echo -e "${CYAN}Available agents:${NC}"
+echo "  agentmind-lead      Team Lead (orchestrator)"
+echo "  agentmind-backend   Backend Developer"
+echo "  agentmind-frontend  Frontend Developer"
+echo "  agentmind-test      Test Engineer"
+echo "  agentmind-security  Security Reviewer"
+echo "  agentmind-reviewer  Code Reviewer"
+echo "  agentmind-devops    DevOps Engineer"
+echo "  agentmind-docs      Documentation Writer"
+echo "  agentmind-perf      Performance Optimizer"
+echo ""
+echo -e "To uninstall: ${YELLOW}bash AgentMind/uninstall.sh${NC}"

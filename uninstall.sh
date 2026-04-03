@@ -1,39 +1,73 @@
 #!/usr/bin/env bash
-# ──────────────────────────────────────────────────────────────
-# AgentMind — Uninstaller
-#
-# Usage:
-#   bash AgentMind/uninstall.sh
-# ──────────────────────────────────────────────────────────────
+# AgentMind — Universal Uninstaller
 set -euo pipefail
-
-VERSION="0.1.0"
-EXT_ID="agentmind.agentmind-${VERSION}"
 
 RED='\033[0;31m'
 GREEN='\033[0;32m'
-BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
 NC='\033[0m'
 
 echo ""
-echo -e "${BLUE}🧠 AgentMind Uninstaller${NC}"
+echo -e "${YELLOW}AgentMind — Uninstaller${NC}"
 echo ""
 
-REMOVED=0
+removed=0
 
-for DIR in "${HOME}/.vscode/extensions" "${HOME}/.vscode-insiders/extensions" "${HOME}/.vscode-oss/extensions"; do
-    TARGET="${DIR}/${EXT_ID}"
-    if [ -d "${TARGET}" ]; then
-        echo -e "${BLUE}→ Removing ${TARGET}${NC}"
-        rm -rf "${TARGET}"
-        REMOVED=1
+remove_from() {
+    local agent_dir="$1"
+    local skill_dir="$2"
+    local ide_name="$3"
+
+    local found=0
+
+    # Remove agent files
+    for f in "${agent_dir}"/agentmind-*.md; do
+        if [ -f "$f" ]; then
+            rm -f "$f"
+            found=1
+        fi
+    done
+
+    # Remove skill directory
+    if [ -d "${skill_dir}/agentmind" ]; then
+        rm -rf "${skill_dir}/agentmind"
+        found=1
+    fi
+
+    if [ "$found" -eq 1 ]; then
+        echo -e "  ${GREEN}✓${NC} Removed from ${ide_name}"
+        removed=$((removed + 1))
+    fi
+}
+
+# Claude Code
+remove_from "${HOME}/.claude/agents" "${HOME}/.claude/skills" "Claude Code"
+
+# VS Code Insiders
+remove_from "${HOME}/.vscode-insiders/agents" "${HOME}/.vscode-insiders/skills" "VS Code Insiders"
+
+# VS Code
+remove_from "${HOME}/.vscode/agents" "${HOME}/.vscode/skills" "VS Code"
+
+# Cursor
+remove_from "${HOME}/.cursor/agents" "${HOME}/.cursor/skills" "Cursor"
+
+# Windsurf
+remove_from "${HOME}/.codeium/windsurf/agents" "${HOME}/.codeium/windsurf/skills" "Windsurf"
+remove_from "${HOME}/.windsurf/agents" "${HOME}/.windsurf/skills" "Windsurf (alt)"
+
+# Also remove old VS Code extension install if present
+for ext_dir in "${HOME}/.vscode/extensions" "${HOME}/.vscode-insiders/extensions" "${HOME}/.vscode-oss/extensions"; do
+    if [ -d "${ext_dir}/agentmind.agentmind-"* ] 2>/dev/null; then
+        rm -rf "${ext_dir}"/agentmind.agentmind-*
+        echo -e "  ${GREEN}✓${NC} Removed old VS Code extension from ${ext_dir}"
+        removed=$((removed + 1))
     fi
 done
 
-if [ "${REMOVED}" -eq 1 ]; then
-    echo ""
-    echo -e "${GREEN}✓ AgentMind uninstalled. Reload VS Code to complete.${NC}"
-else
-    echo -e "${RED}✗ AgentMind not found in any VS Code extensions directory.${NC}"
-fi
 echo ""
+if [ "$removed" -gt 0 ]; then
+    echo -e "${GREEN}✓ AgentMind uninstalled successfully.${NC}"
+else
+    echo -e "${YELLOW}No AgentMind installation found.${NC}"
+fi
